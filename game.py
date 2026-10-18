@@ -1,3 +1,4 @@
+import colorsys
 import math
 import random
 import pygame
@@ -14,14 +15,25 @@ def bezier(p0, p1, p2, p3, t):
     return pygame.Vector2(x, y)
 
 
+# Wave number, set by on_wave_start and read by enemy_tint
+current_wave = 1
+
+
 def enemy_tint(kind):
     """Return an (r, g, b) colour override for an enemy kind, or None for the default."""
-    pass
+    if current_wave <= 1:
+        return None  # wave 1 keeps the original colours
+    # Rotate the hue of the default colour a bit more each wave so waves look distinct
+    r, g, b = (c / 255 for c in ENEMY_COLORS[kind])
+    h, l, s = colorsys.rgb_to_hls(r, g, b)
+    r, g, b = colorsys.hls_to_rgb((h + 0.15 * (current_wave - 1)) % 1.0, l, s)
+    return (int(r * 255), int(g * 255), int(b * 255))
 
 
 def on_wave_start(wave):
     """Called at the start of every wave; add banners, speed-ups, or palette swaps here."""
-    pass
+    global current_wave
+    current_wave = wave
 
 
 def shield_charges(wave):

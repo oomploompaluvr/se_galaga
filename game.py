@@ -41,7 +41,7 @@ def on_wave_start(wave):
 
 def shield_charges(wave):
     """Return how many hits the player's shield can absorb this wave, or None to disable the shield."""
-    pass
+    return min(wave // 3, 3) or None  # 1 charge every 3 waves, capped at 3
 
 
 ENEMY_COLORS = {"boss": (90, 220, 90), "red": (230, 70, 70), "blue": (80, 140, 240)}
@@ -223,6 +223,10 @@ class Game:
                 pygame.draw.polygon(screen, (220, 60, 60), [(sx - 14, PLAYER_Y + 12), (sx - 6, PLAYER_Y - 2), (sx - 4, PLAYER_Y + 12)])
         hud = font.render(f"Score {self.score}  Lives {self.lives}  Wave {self.wave}  R = reset", True, (240, 240, 240))
         screen.blit(hud, (10, 8))
+        if self.shield > 0:
+            for sx in self.ship_xs():
+                pygame.draw.circle(screen, (80, 200, 255), (int(sx), PLAYER_Y), 26, 2)
+            screen.blit(font.render(f"Shield {self.shield}", True, (80, 200, 255)), (10, 30))
         if banner_timer > 0 and self.state == "play":
             big = pygame.font.Font(None, 72).render(banner_text, True, (255, 255, 120))
             screen.blit(big, big.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 80)))

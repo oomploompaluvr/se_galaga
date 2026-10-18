@@ -15,8 +15,10 @@ def bezier(p0, p1, p2, p3, t):
     return pygame.Vector2(x, y)
 
 
-# Wave number, set by on_wave_start and read by enemy_tint
+# Shared state set by on_wave_start and read by enemy_tint / draw
 current_wave = 1
+banner_text, banner_timer = "", 0.0
+BANNER_TIME = 1.5
 
 
 def enemy_tint(kind):
@@ -32,8 +34,9 @@ def enemy_tint(kind):
 
 def on_wave_start(wave):
     """Called at the start of every wave; add banners, speed-ups, or palette swaps here."""
-    global current_wave
+    global current_wave, banner_text, banner_timer
     current_wave = wave
+    banner_text, banner_timer = f"WAVE {wave}", BANNER_TIME
 
 
 def shield_charges(wave):
@@ -144,6 +147,8 @@ class Game:
     def update(self, dt, keys):
         if self.state != "play":
             return
+        global banner_timer
+        banner_timer = max(0.0, banner_timer - dt)
         self.time += dt
         self.cooldown -= dt
         self.invulnerable = max(0.0, self.invulnerable - dt)
@@ -218,6 +223,9 @@ class Game:
                 pygame.draw.polygon(screen, (220, 60, 60), [(sx - 14, PLAYER_Y + 12), (sx - 6, PLAYER_Y - 2), (sx - 4, PLAYER_Y + 12)])
         hud = font.render(f"Score {self.score}  Lives {self.lives}  Wave {self.wave}  R = reset", True, (240, 240, 240))
         screen.blit(hud, (10, 8))
+        if banner_timer > 0 and self.state == "play":
+            big = pygame.font.Font(None, 72).render(banner_text, True, (255, 255, 120))
+            screen.blit(big, big.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 80)))
         if self.state == "lose":
             label = font.render("GAME OVER - Press R", True, (255, 255, 120))
             screen.blit(label, label.get_rect(center=(WIDTH // 2, HEIGHT // 2)))
